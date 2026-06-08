@@ -1,0 +1,37 @@
+---
+name: "Pull Request CI"
+
+on:
+    push:
+        branches: 
+            - main
+
+jobs:
+    build:
+        runs-on: "ubuntu-24.04"
+        steps:
+            - uses: actions/checkout@v4
+            - name: Cache local Maven repository
+              uses: actions/cache@v4
+              with:
+                path: ~/.m2/repository
+                key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+                restore-keys: |
+                  ${{ runner.os }}-maven
+            - name: run maven package
+              run: mvn package
+            
+            
+            - uses: actions/upload-artifact@v4
+              with:
+                name: spc-artifact
+                path: target/*.jar
+            - name: Publish Test Results
+              uses: EnricoMi/publish-unit-test-result-action@v2
+              with:
+                files: |
+                    **/surefire-reports/*.xml
+            - name: Build and analyze
+              env:
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=dummyrepos_mytrails-java

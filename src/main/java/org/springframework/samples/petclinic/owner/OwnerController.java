@@ -41,22 +41,26 @@ import jakarta.validation.Valid;
  * @author Arjen Poutsma
  * @author Michael Isvy
  */
+// MVC controller: handles owner search, create, update, and detail pages
 @Controller
 class OwnerController {
 
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
+	// Spring Data JPA repository for loading and saving Owner entities
 	private final OwnerRepository owners;
 
 	public OwnerController(OwnerRepository clinicService) {
 		this.owners = clinicService;
 	}
 
+	// Prevents form posts from overwriting the primary key (security / data integrity)
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
 		dataBinder.setDisallowedFields("id");
 	}
 
+	// Supplies an "owner" model object to every handler that has an optional ownerId path variable
 	@ModelAttribute("owner")
 	public Owner findOwner(@PathVariable(name = "ownerId", required = false) Integer ownerId) {
 		return ownerId == null ? new Owner() : this.owners.findById(ownerId);
@@ -69,6 +73,7 @@ class OwnerController {
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
+	// @Valid triggers Bean Validation on Owner fields; errors keep the user on the form
 	@PostMapping("/owners/new")
 	public String processCreationForm(@Valid Owner owner, BindingResult result) {
 		if (result.hasErrors()) {
@@ -76,7 +81,7 @@ class OwnerController {
 		}
 
 		this.owners.save(owner);
-		return "redirect:/owners/" + owner.getId();
+		return "redirect:/owners/" + owner.getId(); // PRG pattern: redirect after successful POST
 	}
 
 	@GetMapping("/owners/find")
@@ -121,6 +126,7 @@ class OwnerController {
 		return "owners/ownersList";
 	}
 
+	// UI pages are 1-based; Spring Data PageRequest expects a 0-based index
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);

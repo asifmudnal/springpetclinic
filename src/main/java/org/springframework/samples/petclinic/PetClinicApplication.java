@@ -26,10 +26,13 @@ import org.springframework.context.annotation.ImportRuntimeHints;
  * @author Dave Syer
  *
  */
+// Enables auto-configuration, component scanning, and Spring Boot setup for this package
 @SpringBootApplication
+// Registers GraalVM native-image hints (resources, reflection) used at build time
 @ImportRuntimeHints(PetClinicRuntimeHints.class)
 public class PetClinicApplication {
 
+	// Bootstraps the embedded web server, Spring context, and all @Component beans
 	public static void main(String[] args) {
 		SpringApplication.run(PetClinicApplication.class, args);
 	}

@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author Ken Krebs
  * @author Arjen Poutsma
  */
+// MVC controller: lists veterinarians as HTML or JSON
 @Controller
 class VetController {
 
@@ -41,6 +42,7 @@ class VetController {
 		this.vetRepository = clinicService;
 	}
 
+	// HTML view at /vets.html with server-side pagination (5 vets per page)
 	@GetMapping("/vets.html")
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		// Here we are returning an object of type 'Vets' rather than a collection of Vet
@@ -67,6 +69,7 @@ class VetController {
 		return vetRepository.findAll(pageable);
 	}
 
+	// REST-style endpoint: returns all vets as JSON (no view template)
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		// Here we are returning an object of type 'Vets' rather than a collection of Vet

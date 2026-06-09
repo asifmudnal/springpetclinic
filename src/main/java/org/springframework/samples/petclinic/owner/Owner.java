@@ -42,10 +42,12 @@ import jakarta.validation.constraints.NotEmpty;
  * @author Michael Isvy
  * @author Oliver Drotbohm
  */
+// JPA entity mapped to the "owners" table; inherits id, firstName, lastName from Person
 @Entity
 @Table(name = "owners")
 public class Owner extends Person {
 
+	// Contact and address fields validated when forms are submitted (@Valid on controllers)
 	@Column(name = "address")
 	@NotEmpty
 	private String address;
@@ -56,9 +58,10 @@ public class Owner extends Person {
 
 	@Column(name = "telephone")
 	@NotEmpty
-	@Digits(fraction = 0, integer = 10)
+	@Digits(fraction = 0, integer = 10) // must be exactly 10 numeric digits
 	private String telephone;
 
+	// Pets belong to this owner; EAGER load fetches pets with the owner in one query
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "owner_id")
 	@OrderBy("name")
@@ -92,6 +95,7 @@ public class Owner extends Person {
 		return this.pets;
 	}
 
+	// Only adds pets that have not yet been persisted (no database id assigned)
 	public void addPet(Pet pet) {
 		if (pet.isNew()) {
 			getPets().add(pet);
@@ -129,6 +133,7 @@ public class Owner extends Person {
 	 * @param name to test
 	 * @return a pet if pet name is already in use
 	 */
+	// Case-insensitive lookup; ignoreNew skips unsaved pets when matching by name
 	public Pet getPet(String name, boolean ignoreNew) {
 		name = name.toLowerCase();
 		for (Pet pet : getPets()) {
